@@ -32,7 +32,10 @@ module.exports.AddPreference = (request, response) => {
             const media_id = request.body.id
             connection.query('INSERT INTO preference (account_uid, media_id) VALUES (?, ?)',[account_uid, media_id], (error, result) => {
                 if (error) response.status(400).json({message: 'การเพิ่มรายการโปรดล้มเหลว'})
-                response.status(201).json({message: 'การเพิ่มรายการโปรดสำเร็จ'})
+                connection.query('UPDATE media SET preference = preference + 1 WHERE id = ?',[media_id], (error, result) => {
+                    if (error) response.status(400).json({message: 'การเพิ่มรายการโปรดล้มเหลว'})
+                    response.status(201).json({message: 'การเพิ่มรายการโปรดสำเร็จ'})
+                })
             })
         })
 
