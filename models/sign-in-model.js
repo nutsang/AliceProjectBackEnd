@@ -1,6 +1,5 @@
-const connection = require('./connection')
 const jsonwebtoken = require('jsonwebtoken')
-const SECRET = 'ALICEPROJECT2023'
+const SECRET = process.env.SECRET
 
 module.exports.signInAccount = (request, response) => {
     const { email } = request.body
@@ -14,6 +13,6 @@ module.exports.AuthenticationAccount = (request, response) => {
         const decoded = jsonwebtoken.verify(token, SECRET)
         response.status(200).json({decoded})
     } catch(error){
-        throw response.status(400).json({message: error.message})
+        throw response.status(404).json({message: error.message})
     }
 }

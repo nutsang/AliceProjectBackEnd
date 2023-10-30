@@ -6,6 +6,8 @@ dotenv.config({ path: 'server.env'})
 const homeRoute = require('./routes/home-routes')
 const signUpRoute = require('./routes/sign-up-routes')
 const signInRoute = require('./routes/sign-in-routes')
+const mediaRoute = require('./routes/media-routes')
+const preferenceRoute = require('./routes/preference-routes')
 const app = express()
 
 //middleware
@@ -17,6 +19,8 @@ app.use(morgan('dev'))
 app.use('/api', homeRoute)
 app.use('/api', signUpRoute)
 app.use('/api', signInRoute)
+app.use('/api', mediaRoute)
+app.use('/api', preferenceRoute)
 
 const port = process.env.PORT || 8080
 app.listen(port, () => {

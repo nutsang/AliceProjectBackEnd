@@ -7,6 +7,6 @@ const connection = mysql.createConnection({
     database : process.env.DATABASE
 })
 
-connection.connect((error) => { if (error) throw response.status(500).json({message: 'เซิฟเวอร์กำลังปิดปรับปรุง...'}) })
+connection.connect((error) => { if (error) response.status(500).json({message: 'เซิฟเวอร์กำลังปิดปรับปรุง...'}) })
 
 module.exports = connection
