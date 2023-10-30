@@ -11,3 +11,11 @@ exports.AddPreference = (request, response) => {
 exports.DeletePreference = (request, response) => {
     preferenceModel.DeletePreference(request, response)
 }
+
+exports.PublicPreference = (request, response) => {
+    preferenceModel.PublicPreference(request, response)
+}
+
+exports.PrivatePreference = (request, response) => {
+    preferenceModel.PrivatePreference(request, response)
+}

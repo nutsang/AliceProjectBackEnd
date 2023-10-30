@@ -46,6 +46,49 @@ module.exports.DeletePreference = (request, response) => {
     try{
         const token = request.headers.authorization.split(' ')[1]
         const decoded = jsonwebtoken.verify(token, SECRET)
-        response.status(200).json({decoded})
+        connection.query('SELECT uid FROM account WHERE email = ? LIMIT 1',[decoded.email], (error, result) => {
+            if (error) response.status(400).json({message: 'การเพิ่มรายการโปรดล้มเหลว'})
+            const account_uid = result[0].uid
+            const media_id = request.body.id
+            connection.query('INSERT INTO preference (account_uid, media_id) VALUES (?, ?)',[account_uid, media_id], (error, result) => {
+                if (error) response.status(400).json({message: 'การเพิ่มรายการโปรดล้มเหลว'})
+                connection.query('UPDATE media SET preference = preference + 1 WHERE id = ?',[media_id], (error, result) => {
+                    if (error) response.status(400).json({message: 'การเพิ่มรายการโปรดล้มเหลว'})
+                    response.status(201).json({message: 'การเพิ่มรายการโปรดสำเร็จ'})
+                })
+            })
+        })
+    } catch(error){ response.status(404).json({message: error.message}) }
+}
+
+module.exports.PublicPreference = (request, response) => {
+    try{
+        const token = request.headers.authorization.split(' ')[1]
+        const decoded = jsonwebtoken.verify(token, SECRET)
+        connection.query('SELECT uid FROM account WHERE email = ? LIMIT 1',[decoded.email], (error, result) => {
+            if (error) response.status(400).json({message: 'เปิดให้เป็นสาธารณะล้มเหลว'})
+            const account_uid = result[0].uid
+            const media_id = request.body.id
+            connection.query('UPDATE preference SET public = 1 WHERE account_uid = ? AND media_id = media_id',[account_uid, media_id], (error, result) => {
+                if (error) response.status(400).json({message: 'เปิดให้เป็นสาธารณะล้มเหลว'})
+                response.status(201).json({message: 'เปิดให้เป็นสาธารณะสำเร็จ'})
+            })
+        })
+    } catch(error){ response.status(404).json({message: error.message}) }
+}
+
+module.exports.PrivatePreference = (request, response) => {
+    try{
+        const token = request.headers.authorization.split(' ')[1]
+        const decoded = jsonwebtoken.verify(token, SECRET)
+        connection.query('SELECT uid FROM account WHERE email = ? LIMIT 1',[decoded.email], (error, result) => {
+            if (error) response.status(400).json({message: 'เปิดให้เป็นส่วนตัวล้มเหลว'})
+            const account_uid = result[0].uid
+            const media_id = request.body.id
+            connection.query('UPDATE preference SET public = 0 WHERE account_uid = ? AND media_id = media_id',[account_uid, media_id], (error, result) => {
+                if (error) response.status(400).json({message: 'เปิดให้เป็นส่วนตัวล้มเหลว'})
+                response.status(201).json({message: 'เปิดให้เป็นส่วนตัวสำเร็จ'})
+            })
+        })
     } catch(error){ response.status(404).json({message: error.message}) }
 }
