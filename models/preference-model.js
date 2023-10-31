@@ -32,7 +32,7 @@ module.exports.AddPreference = (request, response) => {
             const media_id = request.body.id
             connection.query('INSERT INTO preference (account_uid, media_id) VALUES (?, ?)',[account_uid, media_id], (error, result) => {
                 if (error) response.status(400).json({message: 'การเพิ่มรายการโปรดล้มเหลว'})
-                connection.query('UPDATE media SET preference = preference + 1 WHERE id = ?',[media_id], (error, result) => {
+                connection.query('UPDATE media SET preference = preference + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',[media_id], (error, result) => {
                     if (error) response.status(400).json({message: 'การเพิ่มรายการโปรดล้มเหลว'})
                     response.status(201).json({message: 'การเพิ่มรายการโปรดสำเร็จ'})
                 })
@@ -52,7 +52,10 @@ module.exports.DeletePreference = (request, response) => {
             const media_id = request.body.id
             connection.query('DELETE FROM preference WHERE account_uid = ? AND media_id = ?',[account_uid, media_id], (error) => {
                 if (error) response.status(400).json({message: 'ลบรายการโปรดล้มเหลว'})
-                response.status(201).json({message: 'ลบเพิ่มรายการโปรดสำเร็จ'})
+                connection.query('UPDATE media SET preference = preference - 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',[media_id], (error, result) => {
+                    if (error) response.status(400).json({message: 'ลบรายการโปรดล้มเหลว'})
+                    response.status(200).json({message: 'ลบเพิ่มรายการโปรดสำเร็จ'})
+                })
             })
         })
     } catch(error){ response.status(404).json({message: error.message}) }
