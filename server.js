@@ -8,6 +8,7 @@ const signUpRoute = require('./routes/sign-up-routes')
 const signInRoute = require('./routes/sign-in-routes')
 const mediaRoute = require('./routes/media-routes')
 const preferenceRoute = require('./routes/preference-routes')
+const editAccountRoute = require('./routes/edit-account-routes')
 const app = express()
 
 //middleware
@@ -21,6 +22,7 @@ app.use('/api', signUpRoute)
 app.use('/api', signInRoute)
 app.use('/api', mediaRoute)
 app.use('/api', preferenceRoute)
+app.use('/api', editAccountRoute)
 
 const port = process.env.PORT || 8080
 app.listen(port, () => {
