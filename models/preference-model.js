@@ -12,7 +12,29 @@ module.exports.GetPreference = (request, response) => {
             connection.query('SELECT media_id FROM preference WHERE account_uid = ? ',[account_uid], (error, result) => {
                 if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
                 const media_id = result.map(preference => preference.media_id)
-                connection.query('SELECT media.*, COUNT(episode.id) as episode_amount, preference.public FROM media LEFT JOIN episode ON media.id = episode.media_id LEFT JOIN preference ON media.id = preference.media_id WHERE media.id IN (?) GROUP BY media.id, media.title, preference.public',[media_id], (error, result) => {
+                connection.query('SELECT media.*, COUNT(episode.id) as episode_amount, preference.public FROM media LEFT JOIN episode ON media.id = episode.media_id LEFT JOIN preference ON media.id = preference.media_id AND preference.account_uid = ? WHERE media.id IN (?) GROUP BY media.id, media.title, preference.public',[account_uid, media_id], (error, result) => {
+                    if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
+                    response.status(200).json(result)
+                })
+            })
+        })
+
+    } catch(error){ response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'}) }
+}
+
+module.exports.GetPreferenceFriend = (request, response) => {
+    try{
+        const token = request.headers.authorization.split(' ')[1]
+        const decoded = jsonwebtoken.verify(token, SECRET)
+        const friend_id = request.params.friend_id//email = ? decoded.email
+        connection.query('SELECT uid FROM account WHERE id = ? LIMIT 1',[friend_id], (error, result) => {
+            
+            if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
+            const account_uid = result[0].uid
+            connection.query('SELECT media_id FROM preference WHERE account_uid = ? AND public = 1',[account_uid], (error, result) => {
+                if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
+                const media_id = result.map(preference => preference.media_id)
+                connection.query('SELECT media.*, COUNT(episode.id) as episode_amount, preference.public FROM media LEFT JOIN episode ON media.id = episode.media_id LEFT JOIN preference ON media.id = preference.media_id AND preference.account_uid = ? WHERE media.id IN (?) GROUP BY media.id, media.title, preference.public',[account_uid, media_id], (error, result) => {
                     if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
                     response.status(200).json(result)
                 })
@@ -69,7 +91,7 @@ module.exports.PublicPreference = (request, response) => {
             if (error) response.status(400).json({message: 'เปิดให้เป็นสาธารณะล้มเหลว'})
             const account_uid = result[0].uid
             const media_id = request.body.id
-            connection.query('UPDATE preference SET public = 1 WHERE account_uid = ? AND media_id = media_id',[account_uid, media_id], (error) => {
+            connection.query('UPDATE preference SET public = 1 WHERE account_uid = ? AND media_id = ?',[account_uid, media_id], (error) => {
                 if (error) response.status(400).json({message: 'เปิดให้เป็นสาธารณะล้มเหลว'})
                 response.status(201).json({message: 'เปิดให้เป็นสาธารณะสำเร็จ'})
             })
@@ -85,7 +107,7 @@ module.exports.PrivatePreference = (request, response) => {
             if (error) response.status(400).json({message: 'เปิดให้เป็นส่วนตัวล้มเหลว'})
             const account_uid = result[0].uid
             const media_id = request.body.id
-            connection.query('UPDATE preference SET public = 0 WHERE account_uid = ? AND media_id = media_id',[account_uid, media_id], (error) => {
+            connection.query('UPDATE preference SET public = 0 WHERE account_uid = ? AND media_id = ?',[account_uid, media_id], (error) => {
                 if (error) response.status(400).json({message: 'เปิดให้เป็นส่วนตัวล้มเหลว'})
                 response.status(201).json({message: 'เปิดให้เป็นส่วนตัวสำเร็จ'})
             })

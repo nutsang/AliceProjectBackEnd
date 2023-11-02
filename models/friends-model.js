@@ -82,7 +82,7 @@ module.exports.getRequest = (request, response) => {
             try{
                 if(error || result.length !== 1) response.status(400)
                 const account_id = result[0].id
-                connection.query('SELECT request.friend_id, account.username FROM request LEFT JOIN account ON account.id = request.friend_id WHERE request.account_id = ?',[account_id], (error, result) => {
+                connection.query('SELECT request.account_id as friend_id, account.username FROM request LEFT JOIN account ON account.id = request.account_id WHERE request.friend_id = ? ',[account_id], (error, result) => {
                     try{
                         if(error || result.length < 1) response.status(400)
                         response.status(200).json(result)
@@ -90,6 +90,7 @@ module.exports.getRequest = (request, response) => {
                         response.json({status: false})
                     }
                 })
+                
             }catch{
                 response.json({status: false})
             }
@@ -139,7 +140,7 @@ module.exports.ignoreFriend = (request, response) => {
                     if(error || result.length !== 1) response.status(400).json({status: false})
                     const friend_id = result[0].id
                     const username = result[0].username
-                    connection.query('DELETE FROM request WHERE account_id = ? AND friend_id = ?',[account_id, friend_id], (error) => {
+                    connection.query('DELETE FROM request WHERE account_id = ? AND friend_id = ?',[friend_id, account_id], (error) => {
                         if(error) response.status(400).json({status: false})
                         response.status(201).json({status: true, account:[friend_id, username]})
                     })
@@ -168,9 +169,12 @@ module.exports.acceptFriend = (request, response) => {
                     const username = result[0].username
                     connection.query('INSERT INTO friends (account_id, friend_id) VALUES (?, ?)',[account_id, friend_id], (error) => {
                         if(error) response.status(400).json({status: false})
-                        connection.query('DELETE FROM request WHERE account_id = ? AND friend_id = ?',[account_id, friend_id], (error) => {
+                        connection.query('INSERT INTO friends (account_id, friend_id) VALUES (?, ?)',[friend_id, account_id], (error) => {
                             if(error) response.status(400).json({status: false})
-                            response.status(201).json({status: true, account:[friend_id, username]})
+                            connection.query('DELETE FROM request WHERE account_id = ? AND friend_id = ? OR friend_id = ? AND account_id = ?',[account_id, friend_id, account_id, friend_id], (error) => {
+                                if(error) response.status(400).json({status: false})
+                                response.status(201).json({status: true, account:[friend_id, username]})
+                            })
                         })
                     })
                 })

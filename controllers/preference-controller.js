@@ -4,6 +4,10 @@ exports.GetPreference = (request, response) => {
     preferenceModel.GetPreference(request, response)
 }
 
+exports.GetPreferenceFriend = (request, response) => {
+    preferenceModel.GetPreferenceFriend(request, response)
+}
+
 exports.AddPreference = (request, response) => {
     preferenceModel.AddPreference(request, response)
 }
