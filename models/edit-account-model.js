@@ -7,7 +7,7 @@ module.exports.getAccount = (request, response) => {
         const token = request.headers.authorization.split(' ')[1]
         const decoded = jsonwebtoken.verify(token, SECRET)
         const email = decoded.email
-        connection.query('SELECT username FROM account WHERE email = ? LIMIT 1',[email], (error, result) => {
+        connection.query('SELECT id, username FROM account WHERE email = ? LIMIT 1',[email], (error, result) => {
             try{
                 if(error || result.length !== 1) throw response.status(400)
                 response.status(200).json(result)
