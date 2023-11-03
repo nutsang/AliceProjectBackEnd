@@ -7,18 +7,19 @@ module.exports.GetPreference = (request, response) => {
         const token = request.headers.authorization.split(' ')[1]
         const decoded = jsonwebtoken.verify(token, SECRET)
         connection.query('SELECT uid FROM account WHERE email = ? LIMIT 1',[decoded.email], (error, result) => {
-            if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
-            const account_uid = result[0].uid
-            connection.query('SELECT media_id FROM preference WHERE account_uid = ? ',[account_uid], (error, result) => {
+            try{
                 if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
-                const media_id = result.map(preference => preference.media_id)
-                connection.query('SELECT media.*, COUNT(episode.id) as episode_amount, preference.public FROM media LEFT JOIN episode ON media.id = episode.media_id LEFT JOIN preference ON media.id = preference.media_id AND preference.account_uid = ? WHERE media.id IN (?) GROUP BY media.id, media.title, preference.public',[account_uid, media_id], (error, result) => {
+                const account_uid = result[0].uid
+                connection.query('SELECT media_id FROM preference WHERE account_uid = ? ',[account_uid], (error, result) => {
                     if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
-                    response.status(200).json(result)
+                    const media_id = result.map(preference => preference.media_id)
+                    connection.query('SELECT media.*, COUNT(episode.id) as episode_amount, preference.public FROM media LEFT JOIN episode ON media.id = episode.media_id LEFT JOIN preference ON media.id = preference.media_id AND preference.account_uid = ? WHERE media.id IN (?) GROUP BY media.id, media.title, preference.public',[account_uid, media_id], (error, result) => {
+                        if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
+                        response.status(200).json(result)
+                    })
                 })
-            })
+            } catch(error) { response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'}) }
         })
-
     } catch(error){ response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'}) }
 }
 
@@ -26,7 +27,7 @@ module.exports.GetPreferenceFriend = (request, response) => {
     try{
         const token = request.headers.authorization.split(' ')[1]
         const decoded = jsonwebtoken.verify(token, SECRET)
-        const friend_id = request.params.friend_id//email = ? decoded.email
+        const friend_id = request.params.friend_id
         connection.query('SELECT uid FROM account WHERE id = ? LIMIT 1',[friend_id], (error, result) => {
             
             if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
