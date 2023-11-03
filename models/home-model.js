@@ -7,7 +7,7 @@ module.exports.getMedia = (request, response) => {
         
         connection.query('SELECT media.id, GROUP_CONCAT(DISTINCT media_genre.genre) AS genres FROM media LEFT JOIN media_genre ON media.id = media_genre.media_id GROUP BY media.id', (error, result) => {
             const genres = result
-            connection.query('SELECT media.*, COUNT(episode.id) AS episode_amount FROM media LEFT JOIN episode ON media.id = episode.media_id GROUP BY media.id', (error, result) => {
+            connection.query('SELECT media.*, COUNT(episode.id) AS episode_amount FROM media LEFT JOIN episode ON media.id = episode.media_id GROUP BY media.id ORDER BY media.popularity DESC', (error, result) => {
                 result.forEach(mediaItem => {
                     const matchingGenre = genres.find((genreItem) => {
                         return genreItem.id === mediaItem.id
