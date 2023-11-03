@@ -12,6 +12,10 @@ exports.getListFriends = (request, response) => {
     friendsModel.getListFriends(request, response)
 }
 
+exports.getFriend = (request, response) => {
+    friendsModel.getFriend(request, response)
+}
+
 exports.addFriend = (request, response) => {
     friendsModel.addFriend(request, response)
 }

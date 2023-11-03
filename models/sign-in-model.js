@@ -31,7 +31,7 @@ module.exports.signInAccount = (request, response) => {
                         }
                     })
                 }else{
-                    response.json({status: false})
+                    response.status(400).json({status: false})
                 }
             }
         }catch{

@@ -2,6 +2,25 @@ const connection = require('./connection')
 const jsonwebtoken = require('jsonwebtoken')
 const SECRET = process.env.SECRET
 
+module.exports.getFriend = (request, response) => {
+    try{
+        console.log(request.body)
+        const token = request.headers.authorization.split(' ')[1]
+        const decoded = jsonwebtoken.verify(token, SECRET)
+        const friend_id = request.body.friend_id
+        connection.query('SELECT username FROM account WHERE id = ? LIMIT 1',[friend_id], (error, result) => {
+            try{
+                if(error || result.length !== 1) throw response.status(400).json({status: false})
+                response.status(200).json({status: true, result})
+            }catch{
+                response.status(400).json({status: false})
+            }
+        })
+    } catch(error){
+        response.status(400).json({message: error.message})
+    }
+}
+
 module.exports.getOther = (request, response) => {
     try{
         const token = request.headers.authorization.split(' ')[1]
@@ -200,7 +219,7 @@ module.exports.unFriend = (request, response) => {
                     if(error || result.length !== 1) response.status(400).json({status: false})
                     const friend_id = result[0].id
                     const username = result[0].username
-                    connection.query('DELETE FROM friends WHERE account_id = ? AND friend_id = ?',[account_id, friend_id], (error) => {
+                    connection.query('DELETE FROM friends WHERE account_id = ? AND friend_id = ? OR account_id = ? AND friend_id = ?',[account_id, friend_id , friend_id, account_id], (error) => {
                         if(error) response.status(400).json({status: false})
                         response.status(201).json({status: true, account:[friend_id, username]})
                     })
