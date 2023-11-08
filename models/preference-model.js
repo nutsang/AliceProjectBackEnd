@@ -15,6 +15,7 @@ module.exports.GetPreference = (request, response) => {
                     const media_id = result.map(preference => preference.media_id)
                     connection.query('SELECT media.*, COUNT(episode.id) as episode_amount, preference.public FROM media LEFT JOIN episode ON media.id = episode.media_id LEFT JOIN preference ON media.id = preference.media_id AND preference.account_uid = ? WHERE media.id IN (?) GROUP BY media.id, media.title, preference.public',[account_uid, media_id], (error, result) => {
                         if (error) response.status(400).json({message: 'การแสดงรายการโปรดล้มเหลว'})
+                        console.log(result)
                         response.status(200).json(result)
                     })
                 })
